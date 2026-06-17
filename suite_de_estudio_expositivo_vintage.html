@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soli Deo Gloria - Consola de Exégesis y Predicación Expositiva</title>
+    
+    <!-- React y ReactDOM desde CDN para asegurar independencia total -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel para compilar JSX directamente en el navegador del usuario -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS CDN para el renderizado JIT de clases y rejillas fluidas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Estilos de tipografías clásicas y personalización del Scriptorium -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+        
+        body {
+            background-color: #f2ebd9;
+            color: #15100a;
+            font-family: 'Lora', 'Georgia', serif;
+        }
+
+        .serif-title {
+            font-family: 'Playfair Display', 'Georgia', serif;
+        }
+
+        /* Ocultar scrollbar estética en listas de pestañas deslizables en móviles */
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const BIBLE_BOOKS = [
+          // Antiguo Testamento
+          { name: "Génesis", chapters: 50, testament: "Antiguo" },
+          { name: "Éxodo", chapters: 40, testament: "Antiguo" },
+          { name: "Levítico", chapters: 27, testament: "Antiguo" },
+          { name: "Números", chapters: 36, testament: "Antiguo" },
+          { name: "Deuteronomio", chapters: 34, testament: "Antiguo" },
+          { name: "Josué", chapters: 24, testament: "Antiguo" },
+          { name: "Jueces", chapters: 21, testament: "Antiguo" },
+          { name: "Rut", chapters: 4, testament: "Antiguo" },
+          { name: "1 Samuel", chapters: 31, testament: "Antiguo" },
+          { name: "2 Samuel", chapters: 24, testament: "Antiguo" },
+          { name: "1 Reyes", chapters: 22, testament: "Antiguo" },
+          { name: "2 Reyes", chapters: 25, testament: "Antiguo" },
+          { name: "1 Crónicas", chapters: 29, testament: "Antiguo" },
+          { name: "2 Crónicas", chapters: 36, testament: "Antiguo" },
+          { name: "Esdras", chapters: 10, testament: "Antiguo" },
+          { name: "Nehemías", chapters: 13, testament: "Antiguo" },
+          { name: "Ester", chapters: 10, testament: "Antiguo" },
+          { name: "Job", chapters: 42, testament: "Antiguo" },
+          { name: "Salmos", chapters: 150, testament: "Antiguo" },
+          { name: "Proverbios", chapters: 31, testament: "Antiguo" },
+          { name: "Eclesiastés", chapters: 12, testament: "Antiguo" },
+          { name: "Cantares", chapters: 8, testament: "Antiguo" },
+          { name: "Isaías", chapters: 66, testament: "Antiguo" },
+          { name: "Jeremías", chapters: 52, testament: "Antiguo" },
+          { name: "Lamentaciones", chapters: 5, testament: "Antiguo" },
+          { name: "Ezequiel", chapters: 48, testament: "Antiguo" },
+          { name: "Daniel", chapters: 12, testament: "Antiguo" },
+          { name: "Oseas", chapters: 14, testament: "Antiguo" },
+          { name: "Joel", chapters: 3, testament: "Antiguo" },
+          { name: "Amós", chapters: 9, testament: "Antiguo" },
+          { name: "Abdías", chapters: 1, testament: "Antiguo" },
+          { name: "Jonás", chapters: 4, testament: "Antiguo" },
+          { name: "Miqueas", chapters: 7, testament: "Antiguo" },
+          { name: "Nahúm", chapters: 3, testament: "Antiguo" },
+          { name: "Habacuc", chapters: 3, testament: "Antiguo" },
+          { name: "Sofonías", chapters: 3, testament: "Antiguo" },
+          { name: "Hageo", chapters: 2, testament: "Antiguo" },
+          { name: "Zacarías", chapters: 14, testament: "Antiguo" },
+          { name: "Malaquías", chapters: 4, testament: "Antiguo" },
+          // Nuevo Testamento
+          { name: "Mateo", chapters: 28, testament: "Nuevo" },
+          { name: "Marcos", chapters: 16, testament: "Nuevo" },
+          { name: "Lucas", chapters: 24, testament: "Nuevo" },
+          { name: "Juan", chapters: 21, testament: "Nuevo" },
+          { name: "Hechos", chapters: 28, testament: "Nuevo" },
+          { name: "Romanos", chapters: 16, testament: "Nuevo" },
+          { name: "1 Corintios", chapters: 16, testament: "Nuevo" },
+          { name: "2 Corintios", chapters: 13, testament: "Nuevo" },
+          { name: "Gálatas", chapters: 6, testament: "Nuevo" },
+          { name: "Efesios", chapters: 6, testament: "Nuevo" },
+          { name: "Filipenses", chapters: 4, testament: "Nuevo" },
+          { name: "Colosenses", chapters: 4, testament: "Nuevo" },
+          { name: "1 Tesalonicenses", chapters: 5, testament: "Nuevo" },
+          { name: "2 Tesalonicenses", chapters: 3, testament: "Nuevo" },
+          { name: "1 Timoteo", chapters: 6, testament: "Nuevo" },
+          { name: "2 Timoteo", chapters: 4, testament: "Nuevo" },
+          { name: "Tito", chapters: 3, testament: "Nuevo" },
+          { name: "Filemón", chapters: 1, testament: "Nuevo" },
+          { name: "Hebreos", chapters: 13, testament: "Nuevo" },
+          { name: "Santiago", chapters: 5, testament: "Nuevo" },
+          { name: "1 Pedro", chapters: 5, testament: "Nuevo" },
+          { name: "2 Pedro", chapters: 3, testament: "Nuevo" },
+          { name: "1 Juan", chapters: 5, testament: "Nuevo" },
+          { name: "2 Juan", chapters: 1, testament: "Nuevo" },
+          { name: "3 Juan", chapters: 1, testament: "Nuevo" },
+          { name: "Judas", chapters: 1, testament: "Nuevo" },
+          { name: "Apocalipsis", chapters: 22, testament: "Nuevo" }
+        ];
+
+        const AUTHORS_META = {
+          "Juan Calvino": { name: "Juan Calvino", role: "Reformador Francés", tag: "Exégesis Histórica" },
+          "John Owen": { name: "John Owen", role: "Puritano Inglés", tag: "Teología del Alma" },
+          "John Gill": { name: "John Gill", role: "Bautista Reformado", tag: "Tipología Hebrea" },
+          "Charles Spurgeon": { name: "Charles Spurgeon", role: "Predicador Puritano", tag: "Fervor Homilético" },
+          "Arthur Pink": { name: "Arthur Pink", role: "Teólogo del Siglo XX", tag: "Doctrinas de la Gracia" },
+          "Jonathan Edwards": { name: "Jonathan Edwards", role: "Puritano Colonial", tag: "Majestad y Belleza" },
+          "William Hendriksen": { name: "William Hendriksen", role: "Comentarista Reformado", tag: "Teología del Pacto" },
+          "John Piper": { name: "John Piper", role: "Teólogo Contemporáneo", tag: "Hedonismo Cristiano" }
+        };
+
+        const DEFAULT_STUDY_CONTENT = {
+          verseText: "En el principio creó Dios los cielos y la tierra.",
+          commentaries: {
+            "Juan Calvino": "«En el principio creó Dios...» Moisés no empieza describiendo la esencia oculta de Dios, sino que nos presenta Su obra eximia en la cual se manifiesta Su gloria. Al decir que creó los cielos y la tierra, nos enseña que nada existía antes de este principio, y que todo cuanto vemos y aquello que permanece invisible fue traído a la existencia de la nada por la sola determinación de Su voluntad soberana. Este pasaje refuta categóricamente la opinión de quienes imaginan una materia eterna, pues el término hebreo utilizado expresa una creación que da inicio al tiempo mismo y a todo lo creado.",
+            "John Owen": "«En el principio creó Dios...» El Espíritu Santo establece aquí el fundamento de toda fe y adoración verdadera: el origen temporal y de la nada de todo el cosmos. Toda criatura, por excelente que sea en su naturaleza o función, debe su entero ser al decreto libre de la soberana voluntad divina. Nada hay fuera de Dios que sea coeterno con Él, ni materia alguna preexistente de la cual Él tuviera necesidad. Esta obra majestuosa es la emanación externa de la infinita suficiencia de la Deidad, manifestada para el eterno asombro de Sus criaturas racionales.",
+            "John Gill": "«En el principio creó Dios los cielos y la tierra.» La palabra hebrea 'Bara' denota una producción de algo a partir de la nada absoluta. El nombre del Creador es 'Elohim', un término en plural que apunta a la subsistencia de una pluralidad de Personas en la divina esencia; no de tres dioses, sino de tres Personas coesenciales en un solo Dios verdadero, participando de forma indivisible en este acto de creación. Los 'cielos' se refieren a la morada celestial y los ángeles invisibles, y la 'tierra' al globo terráqueo como escenario del pacto de gracia.",
+            "Charles Spurgeon": "Contemplemos estas palabras que abren el libro eterno de Dios. Antes de que hubiese una sola estrella que brillara en el firmamento o una sola gota de rocío sobre los campos, Dios era en Sí mismo infinitamente glorioso, santo y bienaventurado. Él no requería andamios ni materia previa; Su sola voz soberana llamó a la existencia lo invisible y lo visible. Adora a Aquel cuyo poder creador sostiene los mundos en el espacio y cuya gracia tierna sostiene hoy tu alma.",
+            "Arthur Pink": "Este grandioso versículo de apertura establece de una vez y para siempre el señorío absoluto del Altísimo sobre todo lo creado. Desvanece el ateísmo por cuanto declara la existencia real de Dios; destruye el panteísmo al trazar un abismo insondable entre el Creador Autoexistente y la criatura dependiente; y derriba el materialismo moderno al probar que la materia tuvo un inicio definido. Dios hace lo que quiere, cuando quiere y como le place, sin consultar a ninguna criatura.",
+            "Jonathan Edwards": "La creación de los cielos y la tierra es la comunicación activa de la divina plenitud de Dios hacia el exterior. Dios no creó por necesidad de suplir una imperfección interna, sino para que Su infinita excelencia, sabiduría, soberana bondad y belleza fuesen derramadas y contempladas por criaturas inteligentes capaces de regocijarse en Su gloria eterna. Los cielos y la tierra entera no son sino un reflejo pálido pero verdadero de la infinita luz espiritual del Creador.",
+            "William Hendriksen": "«En el principio creó Dios los cielos y la tierra.» Con esta declaración monumental se introduce el drama de la historia redentora. La soberanía de Dios se manifiesta en primer lugar en Su carácter de Creador absoluto de todo cuanto existe. No hay lugar en la teología reformada para un dualismo cósmico o una evolución autónoma; todo debe su origen, estructura y preservación histórica al soberano decreto de Elohim. Este acto inicial de creación ex nihilo establece el marco pactual en el cual Dios obrará Su gracia redentora para la preservación de Su pueblo escogido.",
+            "John Piper": "La creación entera fue hecha por causa de la gloria de Dios. Él no nos hizo porque se sintiera solo o incompleto, sino para que viésemos, saboreásemos y proclamásemos la insuperable excelencia de Su carácter. El cielo y la tierra cantan al unísono Su majestad incontestable. Nuestra mayor felicidad y el fin para el cual fuimos diseñados de la nada por Su mano no es la autonomía humana, sino el gozo reverente de Su glorioso señorío."
+          },
+          sermonOutline: {
+            pericopaRango: "Génesis 1:1",
+            lineaMelodica: "Génesis es el libro de los comienzos que establece la soberanía y fidelidad del Dios del Pacto al bendecir a Su creación.",
+            ideaCentralTexto: "Al principio del tiempo, Dios ejerció Su soberanía al crear todo el universo físico y espiritual de la nada absoluta.",
+            ideaCentralSermon: "Puesto que pertenecemos al Creador absoluto de todas las cosas, nuestro diseño existencial consiste en someternos a Su soberano señorío.",
+            estructuraExpositiva: [
+              { porcion: "Génesis 1:1a", titulo: "El Origen Exclusivo del Tiempo", explicacion: "La frase 'En el principio' nos enseña que Dios precede a la materia y a la historia creada; Él gobierna los tiempos bajo Sus sabios decretos." },
+              { porcion: "Génesis 1:1b", titulo: "El Poder Creador Sin Recursos Preexistentes", explicacion: "El verbo hebreo 'Bara' aplicado exclusivamente a Dios muestra que Su voz posee el poder de llamar ex nihilo (de la nada) las cosas que no existen." },
+              { porcion: "Génesis 1:1c", titulo: "El Señorío Legítimo Sobre Todo", explicacion: "Al haber dado ser a 'los cielos y la tierra', Dios se levanta como único Dueño, Propietario y Sustentador indiscutible de toda la creación visible e invisible." }
+            ],
+            caminoCruz: "El Verbo eterno por medio de quien todas las cosas en Génesis 1:1 fueron creadas (Juan 1:1-3) se despojó de Su gloria excelsa para entrar en la creación caída. En la cruz, Él sufrió las tinieblas del juicio divino para restaurar las consecuencias cósmicas del pecado, abriendo camino para una gloriosa Nueva Creación."
+          },
+          biblicalContext: [
+            { pasaje: "Juan 1:1-3", relacion: "Confirmación del Verbo Creador", explicacion: "Revela que Jesucristo, el Verbo Eterno de Dios, ya existía en el principio y es el agente creador de todo." },
+            { pasaje: "Colosenses 1:16-17", relacion: "Sustentación Activa en Cristo", explicacion: "Demuestra que la creación fue diseñada por medio de Cristo, para Cristo, y se sostiene por Él." },
+            { pasaje: "Hebreos 11:3", relacion: "Hermenéutica de la Fe", explicacion: "Comprendemos que el universo visible fue constituido de lo que no se veía por la sola palabra de Dios." }
+          ],
+          exegesisData: [
+            {
+              word: "Principio",
+              original: "Bereshít (בְּרֵאשִׁית)",
+              strong: "H7225",
+              lexicon: "Sustantivo que denota 'primacía temporal u origen'. Se compone de la preposición 'Be' (en) y la raíz 'Resh' (cabeza/primero).",
+              historicalContext: "Frente a los mitos cosmogónicos paganos donde los dioses organizaban materia preexistente, Moisés declara un inicio absoluto temporal diseñado por un único Creador trascendente.",
+              enrichment: "Establece que el tiempo mismo es una creación divina. Dios gobierna la historia soberanamente desde el principio."
+            },
+            {
+              word: "Creó",
+              original: "Bará (בָּרָא)",
+              strong: "H1254",
+              lexicon: "Verbo utilizado exclusivamente con Dios como sujeto. Denota creación ex nihilo (de la nada absoluta) con el solo poder de Su palabra decretadora.",
+              historicalContext: "Distingue al Dios de Israel de los ídolos inertes molduradores. Dios no requiere herramientas ni andamios.",
+              enrichment: "Su voz tiene poder absoluto para llamar a existencia la luz en el caos espiritual y recrear el alma de Sus elegidos."
+            }
+          ]
+        };
+
+        const GEMINI_MODEL = "gemini-3-flash-preview";
+
+        function App() {
+          const [selectedBook, setSelectedBook] = React.useState("Génesis");
+          const [selectedChapter, setSelectedChapter] = React.useState(1);
+          const [selectedVerse, setSelectedVerse] = React.useState(1);
+          const [selectedEndVerse, setSelectedEndVerse] = React.useState(1);
+          const [bibleVersion, setBibleVersion] = React.useState("RV1960");
+          const [activeTestament, setActiveTestament] = React.useState("Antiguo");
+          
+          const [verseText, setVerseText] = React.useState(DEFAULT_STUDY_CONTENT.verseText);
+          const [loadingVerse, setLoadingVerse] = React.useState(false);
+          
+          // Cargas segmentadas de las 4 pestañas de estudio
+          const [loadingCommentaries, setLoadingCommentaries] = React.useState(false);
+          const [loadingOutline, setLoadingOutline] = React.useState(false);
+          const [loadingContext, setLoadingContext] = React.useState(false);
+          const [loadingExegesis, setLoadingExegesis] = React.useState(false);
+
+          const [commentaries, setCommentaries] = React.useState(DEFAULT_STUDY_CONTENT.commentaries);
+          const [sermonOutline, setSermonOutline] = React.useState(DEFAULT_STUDY_CONTENT.sermonOutline);
+          const [biblicalContext, setBiblicalContext] = React.useState(DEFAULT_STUDY_CONTENT.biblicalContext);
+          const [exegesisData, setExegesisData] = React.useState(DEFAULT_STUDY_CONTENT.exegesisData);
+
+          const [commentariesLoaded, setCommentariesLoaded] = React.useState(true);
+          const [outlineLoaded, setOutlineLoaded] = React.useState(true);
+          const [contextLoaded, setContextLoaded] = React.useState(true);
+          const [exegesisLoaded, setExegesisLoaded] = React.useState(true);
+
+          const [activeTab, setActiveTab] = React.useState("commentaries"); 
+          const [error, setError] = React.useState(null);
+          const [activeAuthor, setActiveAuthor] = React.useState(null);
+          const [fontSize, setFontSize] = React.useState("text-base");
+
+          // Configuración local de API Key para que el usuario sea independiente
+          const [customApiKey, setCustomApiKey] = React.useState(() => {
+            return localStorage.getItem('solideogloria_key') || "";
+          });
+          const [showSettings, setShowSettings] = React.useState(false);
+
+          const currentBookObj = BIBLE_BOOKS.find(b => b.name === selectedBook) || BIBLE_BOOKS[0];
+          const maxChapters = currentBookObj.chapters;
+          
+          const getMaxVerses = (book, chapter) => {
+            if (book === "Salmos") {
+              if (chapter === 119) return 176;
+              if (chapter === 117) return 2;
+              return 35;
+            }
+            if (["Mateo", "Lucas", "Juan", "Génesis", "Isaías"].includes(book)) return 60;
+            return 45;
+          };
+          const maxVerses = getMaxVerses(selectedBook, selectedChapter);
+
+          React.useEffect(() => {
+            if (selectedVerse > selectedEndVerse) {
+              setSelectedEndVerse(selectedVerse);
+            }
+          }, [selectedVerse]);
+
+          React.useEffect(() => {
+            if (selectedBook === "Génesis" && selectedChapter === 1 && selectedVerse === 1 && selectedEndVerse === 1 && bibleVersion === "RV1960") {
+              setVerseText(DEFAULT_STUDY_CONTENT.verseText);
+              setCommentaries(DEFAULT_STUDY_CONTENT.commentaries);
+              setSermonOutline(DEFAULT_STUDY_CONTENT.sermonOutline);
+              setBiblicalContext(DEFAULT_STUDY_CONTENT.biblicalContext);
+              setExegesisData(DEFAULT_STUDY_CONTENT.exegesisData);
+              setCommentariesLoaded(true);
+              setOutlineLoaded(true);
+              setContextLoaded(true);
+              setExegesisLoaded(true);
+            } else {
+              setVerseText("");
+              setCommentaries({});
+              setSermonOutline(null);
+              setBiblicalContext([]);
+              setExegesisData([]);
+              setCommentariesLoaded(false);
+              setOutlineLoaded(false);
+              setContextLoaded(false);
+              setExegesisLoaded(false);
+              fetchVerseText(selectedBook, selectedChapter, selectedVerse, selectedEndVerse, bibleVersion);
+            }
+            setError(null);
+          }, [selectedBook, selectedChapter, selectedVerse, selectedEndVerse, bibleVersion]);
+
+          const fetchWithRetry = async (url, options, retries = 5, delay = 1000) => {
+            try {
+              const response = await fetch(url, options);
+              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+              return await response.json();
+            } catch (err) {
+              if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return fetchWithRetry(url, options, retries - 1, delay * 2);
+              }
+              throw err;
+            }
+          };
+
+          const checkApiKey = () => {
+            if (!customApiKey) {
+              setError("Se requiere una API Key de Gemini configurada. Haz clic en el engranaje arriba a la derecha para guardarla.");
+              return false;
+            }
+            return true;
+          };
+
+          const fetchVerseText = async (book, chapter, startVerse, endVerse, version) => {
+            setLoadingVerse(true);
+            try {
+              const rangeStr = startVerse === endVerse ? `${startVerse}` : `${startVerse}-${endVerse}`;
+              const prompt = `Proporciona el texto bíblico exacto en español, adaptado a la traducción de la versión ${version}, para el pasaje: ${book} ${chapter}:${rangeStr}. Devuelve únicamente un objeto JSON con el siguiente formato, donde se muestre el texto de los versículos consultados:
+              {
+                "verseText": "El texto del pasaje o rango de versículos aquí"
+              }`;
+
+              const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  responseSchema: {
+                    type: "OBJECT",
+                    properties: { verseText: { type: "STRING" } },
+                    required: ["verseText"]
+                  }
+                }
+              };
+
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${customApiKey}`;
+              const result = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+
+              const dataText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (dataText) {
+                const parsed = JSON.parse(dataText);
+                setVerseText(parsed.verseText || "Texto no disponible.");
+              }
+            } catch (err) {
+              console.error(err);
+              setVerseText(`Lectura: ${book} ${chapter}:${startVerse}${startVerse !== endVerse ? `-${endVerse}` : ''} (${version})`);
+            } finally {
+              setLoadingVerse(false);
+            }
+          };
+
+          const fetchCommentariesOnly = async () => {
+            if (!checkApiKey()) return;
+            setLoadingCommentaries(true);
+            setError(null);
+            try {
+              const systemPrompt = `Eres un transcriptor y archivista teológico de la herencia reformada y puritana. Tu misión absoluta es proveer traducciones fieles, exactas y literales en ESPAÑOL de los comentarios o escritos originales de cada autor para el pasaje indicado. No uses paráfrasis ni resúmenes inventados, ni hables en tercera persona de ellos. Debe leerse como sus propios escritos traducidos directamente de sus impresos antiguos.`;
+              const rangeStr = selectedVerse === selectedEndVerse ? `${selectedVerse}` : `${selectedVerse}-${selectedEndVerse}`;
+              const userPrompt = `Genera un bloque de transcripciones directas y comentarios textuales originales traducidos al español (mínimo de 3 párrafos extensos por autor) para el pasaje: ${selectedBook} ${selectedChapter}:${rangeStr} ("${verseText}") para los siguientes 8 autores:
+              - Juan Calvino
+              - John Owen
+              - John Gill
+              - Charles Spurgeon
+              - Arthur Pink
+              - Jonathan Edwards
+              - William Hendriksen
+              - John Piper
+              
+              Devuelve un objeto JSON con esta estructura exacta de identificadores ASCII cortos para garantizar máxima estabilidad:
+              {
+                "commentaries": {
+                  "calvino": "Comentario literal de Juan Calvino aquí...",
+                  "owen": "Comentario literal de John Owen aquí...",
+                  "gill": "Comentario literal de John Gill aquí...",
+                  "spurgeon": "Comentario literal de Charles Spurgeon aquí...",
+                  "pink": "Comentario literal de Arthur Pink aquí...",
+                  "edwards": "Comentario literal de Jonathan Edwards aquí...",
+                  "hendriksen": "Comentario literal de William Hendriksen aquí...",
+                  "piper": "Comentario de John Piper aquí..."
+                }
+              }`;
+
+              const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                      commentaries: {
+                        type: "OBJECT",
+                        properties: {
+                          calvino: { type: "STRING" },
+                          owen: { type: "STRING" },
+                          gill: { type: "STRING" },
+                          spurgeon: { type: "STRING" },
+                          pink: { type: "STRING" },
+                          edwards: { type: "STRING" },
+                          hendriksen: { type: "STRING" },
+                          piper: { type: "STRING" }
+                        },
+                        required: ["calvino", "owen", "gill", "spurgeon", "pink", "edwards", "hendriksen", "piper"]
+                      }
+                    },
+                    required: ["commentaries"]
+                  }
+                }
+              };
+
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${customApiKey}`;
+              const result = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+
+              const dataText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (!dataText) throw new Error("Servidor exegético no disponible.");
+
+              const parsedData = JSON.parse(dataText);
+              const raw = parsedData.commentaries;
+              const mapped = {
+                "Juan Calvino": raw.calvino,
+                "John Owen": raw.owen,
+                "John Gill": raw.gill,
+                "Charles Spurgeon": raw.spurgeon,
+                "Arthur Pink": raw.pink,
+                "Jonathan Edwards": raw.edwards,
+                "William Hendriksen": raw.hendriksen,
+                "John Piper": raw.piper
+              };
+              setCommentaries(mapped);
+              setCommentariesLoaded(true);
+            } catch (err) {
+              console.error(err);
+              setError("No se pudieron cargar las transcripciones.");
+            } finally {
+              setLoadingCommentaries(false);
+            }
+          };
+
+          const fetchSermonOutlineOnly = async () => {
+            if (!checkApiKey()) return;
+            setLoadingOutline(true);
+            setError(null);
+            try {
+              const systemPrompt = `Eres un instructor homilético experto del Charles Simeon Trust. Tu labor es de alto nivel.
+              CRITERIO DE DELIMITACIÓN DEL TEXTO (PERÍCOPA):
+              - Analiza el rango de versículos seleccionado: si este contiene una unidad de pensamiento expositivo autónomo y completo, mantén la perícopa estrictamente en dicho rango.
+              - Si el pasaje requiere la unión de varios versículos para evitar descontextualizar el hilo lógico, amplía homiléticamente la unidad literaria indicando el rango modificado en 'pericopaRango'.`;
+
+              const rangeStr = selectedVerse === selectedEndVerse ? `${selectedVerse}` : `${selectedVerse}-${selectedEndVerse}`;
+              const userPrompt = `Genera un Bosquejo Expositivo en español bajo la metodología Simeon Trust basado en el pasaje: ${selectedBook} ${selectedChapter}:${rangeStr} ("${verseText}").
+              
+              Devuelve un JSON estricto con esta estructura:
+              {
+                "sermonOutline": {
+                  "pericopaRango": "...",
+                  "lineaMelodica": "...",
+                  "ideaCentralTexto": "...",
+                  "ideaCentralSermon": "...",
+                  "estructuraExpositiva": [
+                    { "porcion": "...", "titulo": "...", "explicacion": "..." }
+                  ],
+                  "caminoCruz": "..."
+                }
+              }`;
+
+              const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                      sermonOutline: {
+                        type: "OBJECT",
+                        properties: {
+                          pericopaRango: { type: "STRING" },
+                          lineaMelodica: { type: "STRING" },
+                          ideaCentralTexto: { type: "STRING" },
+                          ideaCentralSermon: { type: "STRING" },
+                          estructuraExpositiva: {
+                            type: "ARRAY",
+                            items: {
+                              type: "OBJECT",
+                              properties: { porcion: { type: "STRING" }, titulo: { type: "STRING" }, explicacion: { type: "STRING" } },
+                              required: ["porcion", "titulo", "explicacion"]
+                            }
+                          },
+                          caminoCruz: { type: "STRING" }
+                        },
+                        required: ["pericopaRango", "lineaMelodica", "ideaCentralTexto", "ideaCentralSermon", "estructuraExpositiva", "caminoCruz"]
+                      }
+                    },
+                    required: ["sermonOutline"]
+                  }
+                }
+              };
+
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${customApiKey}`;
+              const result = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+
+              const dataText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (!dataText) throw new Error("Servidor homilético no disponible.");
+
+              const parsedData = JSON.parse(dataText);
+              setSermonOutline(parsedData.sermonOutline);
+              setOutlineLoaded(true);
+            } catch (err) {
+              console.error(err);
+              setError("No se pudo compilar el bosquejo expositivo.");
+            } finally {
+              setLoadingOutline(false);
+            }
+          };
+
+          const fetchBiblicalContextOnly = async () => {
+            if (!checkApiKey()) return;
+            setLoadingContext(true);
+            setError(null);
+            try {
+              const systemPrompt = `Eres un teólogo bíblico especialista en la analogía de la fe reformada (la Escritura se interpreta a sí misma). Tu tarea es proveer pasajes cruzados y su respectivo análisis doctrinal en ESPAÑOL.`;
+              const rangeStr = selectedVerse === selectedEndVerse ? `${selectedVerse}` : `${selectedVerse}-${selectedEndVerse}`;
+              const userPrompt = `Provee un listado de 3 pasajes bíblicos paralelos e intertextuales importantes relacionados con el pasaje: ${selectedBook} ${selectedChapter}:${rangeStr} ("${verseText}").
+              
+              Debes retornar un JSON con esta estructura de array exacta (atención: usa la clave 'relacion' sin acentos en propiedades y requeridos):
+              {
+                "biblicalContext": [
+                  { "pasaje": "...", "relacion": "...", "explicacion": "..." }
+                ]
+              }`;
+
+              const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                      biblicalContext: {
+                        type: "ARRAY",
+                        items: {
+                          type: "OBJECT",
+                          properties: { 
+                            pasaje: { type: "STRING" }, 
+                            relacion: { type: "STRING" }, 
+                            explicacion: { type: "STRING" } 
+                          },
+                          required: ["pasaje", "relacion", "explicacion"]
+                        }
+                      }
+                    },
+                    required: ["biblicalContext"]
+                  }
+                }
+              };
+
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${customApiKey}`;
+              const result = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+
+              const dataText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (!dataText) throw new Error("Servidor intertextual no disponible.");
+
+              const parsedData = JSON.parse(dataText);
+              setBiblicalContext(parsedData.biblicalContext);
+              setContextLoaded(true);
+            } catch (err) {
+              console.error(err);
+              setError("No se pudieron cargar los pasajes cruzados.");
+            } finally {
+              setLoadingContext(false);
+            }
+          };
+
+          const fetchExegesisOnly = async () => {
+            if (!checkApiKey()) return;
+            setLoadingExegesis(true);
+            setError(null);
+            try {
+              const systemPrompt = `Eres un lingüista y teólogo experto en lenguas bíblicas (hebreo y griego antiguo). Realiza un análisis filológico en español de vocablos clave de forma rigurosa.`;
+              const rangeStr = selectedVerse === selectedEndVerse ? `${selectedVerse}` : `${selectedVerse}-${selectedEndVerse}`;
+              const userPrompt = `Identifica y analiza en profundidad 2 o 3 palabras teológicamente cruciales del pasaje: ${selectedBook} ${selectedChapter}:${rangeStr} ("${verseText}").
+              
+              Devuelve un JSON estructurado con esta forma exacta:
+              {
+                "exegesisData": [
+                  { "word": "...", "original": "...", "strong": "...", "lexicon": "...", "historicalContext": "...", "enrichment": "..." }
+                ]
+              }`;
+
+              const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                      exegesisData: {
+                        type: "ARRAY",
+                        items: {
+                          type: "OBJECT",
+                          properties: {
+                            word: { type: "STRING" },
+                            original: { type: "STRING" },
+                            strong: { type: "STRING" },
+                            lexicon: { type: "STRING" },
+                            historicalContext: { type: "STRING" },
+                            enrichment: { type: "STRING" }
+                          },
+                          required: ["word", "original", "strong", "lexicon", "historicalContext", "enrichment"]
+                        }
+                      }
+                    },
+                    required: ["exegesisData"]
+                  }
+                }
+              };
+
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${customApiKey}`;
+              const result = await fetchWithRetry(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+
+              const dataText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (!dataText) throw new Error("Servidor lingüístico no disponible.");
+
+              const parsedData = JSON.parse(dataText);
+              setExegesisData(parsedData.exegesisData);
+              setExegesisLoaded(true);
+            } catch (err) {
+              console.error(err);
+              setError("No se pudo compilar la exégesis de palabras.");
+            } finally {
+              setLoadingExegesis(false);
+            }
+          };
+
+          const navigateVerse = (direction) => {
+            let nextVerse = selectedVerse + direction;
+            if (nextVerse < 1) {
+              if (selectedChapter > 1) {
+                const prevChapter = selectedChapter - 1;
+                setSelectedChapter(prevChapter);
+                const maxPrev = getMaxVerses(selectedBook, prevChapter);
+                setSelectedVerse(maxPrev);
+                setSelectedEndVerse(maxPrev);
+              }
+            } else if (nextVerse > maxVerses) {
+              if (selectedChapter < maxChapters) {
+                setSelectedChapter(selectedChapter + 1);
+                setSelectedVerse(1);
+                setSelectedEndVerse(1);
+              }
+            } else {
+              setSelectedVerse(nextVerse);
+              setSelectedEndVerse(nextVerse);
+            }
+          };
+
+          const handleSaveApiKey = (key) => {
+            setCustomApiKey(key);
+            localStorage.setItem('solideogloria_key', key);
+            setShowSettings(false);
+          };
+
+          return (
+            <div className="min-h-screen pb-10" style={{ backgroundColor: '#f2ebd9', color: '#15100a' }}>
+              
+              {/* Cabecera Vintage */}
+              <header className="flex justify-between items-center px-6 py-6 border-b-2 border-[#d3c4a1]" style={{ backgroundColor: '#fffdf7' }}>
+                <div>
+                  <h1 className="text-2xl md:text-4xl font-bold tracking-tight serif-title text-[#15100a]">
+                    <span style={{ color: '#8a3324' }}>Soli Deo</span> Gloria
+                  </h1>
+                  <p className="text-xs md:text-sm opacity-90 text-[#4a3a2a] mt-1">Consola de Exégesis y Predicación Expositiva Independiente</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="p-2.5 rounded-lg border border-[#c4b18c] bg-[#faf5e6] hover:bg-[#d3c4a1] transition flex items-center justify-center cursor-pointer"
+                    title="Configurar Clave API"
+                  >
+                    <svg className="w-5 h-5 text-[#8a3324]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                  <div className="hidden sm:block text-xs font-bold border border-[#d3c4a1] px-4 py-1.5 rounded text-[#8a3324]" style={{ backgroundColor: '#faf5e6' }}>
+                    SOCIETAS BIBLICA
+                  </div>
+                </div>
+              </header>
+
+              {/* Ajustes de API Key flotante */}
+              {showSettings && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                  <div className="w-full max-w-md p-6 rounded-lg shadow-xl" style={{ backgroundColor: '#fffdf7', color: '#15100a', border: '1px solid #d3c4a1' }}>
+                    <h3 className="serif-title font-black text-xl mb-2">Clave de API de Gemini</h3>
+                    <p className="text-xs text-[#4a3a2a] mb-4 leading-relaxed">
+                      Tu API Key se almacena localmente de forma segura en tu propio navegador (`localStorage`). No se envía a ningún servidor intermediario. Es necesaria para buscar exégesis y compilar bosquejos en tiempo real.
+                    </p>
+                    <input
+                      type="password"
+                      placeholder="Introduce tu clave AIzaSy..."
+                      defaultValue={customApiKey}
+                      id="apiKeyField"
+                      className="w-full p-2.5 border border-[#d3c4a1] rounded-lg text-sm mb-4 font-mono focus:outline-none focus:ring-1 focus:ring-[#3b593f] bg-[#faf5e6] text-[#15100a]"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button 
+                        onClick={() => setShowSettings(false)} 
+                        className="px-4 py-2 border border-[#d3c4a1] rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        onClick={() => handleSaveApiKey(document.getElementById('apiKeyField').value)} 
+                        className="px-4 py-2 text-white font-bold rounded-lg text-xs cursor-pointer"
+                        style={{ backgroundColor: '#3b593f' }}
+                      >
+                        Guardar Clave
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {}
+              <div className="w-full px-4 md:px-8 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-full">
+                
+                {/* COLUMNA IZQUIERDA: Selector + Lectura (35% de pantalla aprox) */}
+                <div className="lg:col-span-4 flex flex-col gap-6">
+                  
+                  {/* Panel de Selección */}
+                  <div className="rounded-lg p-5 md:p-6 shadow-md border border-[#d3c4a1]" style={{ backgroundColor: '#fffdf7' }}>
+                    <h3 className="text-lg md:text-xl font-bold mb-4 pb-2 border-b-2 border-[#d3c4a1] serif-title" style={{ color: '#15100a' }}>
+                      Selección <span className="text-[#8a3324]">del Texto</span>
+                    </h3>
+                    
+                    {/* Testamento */}
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        onClick={() => {
+                          setActiveTestament("Antiguo");
+                          setSelectedBook("Génesis");
+                          setSelectedChapter(1);
+                          setSelectedVerse(1);
+                          setSelectedEndVerse(1);
+                        }}
+                        className="flex-1 py-2 rounded text-xs md:text-sm font-bold transition-all border border-[#d3c4a1] cursor-pointer"
+                        style={{
+                          backgroundColor: activeTestament === "Antiguo" ? "#3b593f" : "#faf5e6",
+                          color: activeTestament === "Antiguo" ? "#ffffff" : "#15100a"
+                        }}
+                      >
+                        Antiguo Testamento
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveTestament("Nuevo");
+                          setSelectedBook("Mateo");
+                          setSelectedChapter(1);
+                          setSelectedVerse(1);
+                          setSelectedEndVerse(1);
+                        }}
+                        className="flex-1 py-2 rounded text-xs md:text-sm font-bold transition-all border border-[#d3c4a1] cursor-pointer"
+                        style={{
+                          backgroundColor: activeTestament === "Nuevo" ? "#3b593f" : "#faf5e6",
+                          color: activeTestament === "Nuevo" ? "#ffffff" : "#15100a"
+                        }}
+                      >
+                        Nuevo Testamento
+                      </button>
+                    </div>
+
+                    {/* Versión de la Biblia */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-bold uppercase mb-1" style={{ color: '#8a3324' }}>Traducción:</label>
+                      <select
+                        value={bibleVersion}
+                        onChange={(e) => setBibleVersion(e.target.value)}
+                        className="w-full p-2.5 rounded-lg border border-[#d3c4a1] text-sm bg-[#faf5e6] text-[#15100a] font-bold focus:outline-none cursor-pointer"
+                      >
+                        <option value="RV1960">Reina-Valera 1960 (RV1960)</option>
+                        <option value="NBLA">Nueva Biblia de las Américas (NBLA)</option>
+                        <option value="NVI">Nueva Versión Internacional (NVI)</option>
+                      </select>
+                    </div>
+
+                    {/* Libro */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-bold uppercase mb-1" style={{ color: '#8a3324' }}>Libro:</label>
+                      <select
+                        value={selectedBook}
+                        onChange={(e) => {
+                          setSelectedBook(e.target.value);
+                          setSelectedChapter(1);
+                          setSelectedVerse(1);
+                          setSelectedEndVerse(1);
+                        }}
+                        className="w-full p-2.5 rounded-lg border border-[#d3c4a1] text-sm bg-[#faf5e6] text-[#15100a] font-bold focus:outline-none cursor-pointer"
+                      >
+                        {BIBLE_BOOKS.filter(b => b.testament === activeTestament).map(b => (
+                          <option key={b.name} value={b.name}>{b.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Rango de Versículos */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold uppercase mb-1" style={{ color: '#8a3324' }}>Capítulo:</label>
+                        <select
+                          value={selectedChapter}
+                          onChange={(e) => {
+                            setSelectedChapter(parseInt(e.target.value));
+                            setSelectedVerse(1);
+                            setSelectedEndVerse(1);
+                          }}
+                          className="w-full p-2 rounded border border-[#d3c4a1] text-sm bg-[#faf5e6] text-[#15100a] font-bold cursor-pointer"
+                        >
+                          {Array.from({ length: maxChapters }, (_, i) => i + 1).map(ch => (
+                            <option key={ch} value={ch}>{ch}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase mb-1" style={{ color: '#8a3324' }}>De Vers.:</label>
+                        <select
+                          value={selectedVerse}
+                          onChange={(e) => setSelectedVerse(parseInt(e.target.value))}
+                          className="w-full p-2 rounded border border-[#d3c4a1] text-sm bg-[#faf5e6] text-[#15100a] font-bold cursor-pointer"
+                        >
+                          {Array.from({ length: maxVerses }, (_, i) => i + 1).map(v => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase mb-1" style={{ color: '#8a3324' }}>Al Vers.:</label>
+                        <select
+                          value={selectedEndVerse}
+                          onChange={(e) => setSelectedEndVerse(parseInt(e.target.value))}
+                          className="w-full p-2 rounded border border-[#d3c4a1] text-sm bg-[#faf5e6] text-[#15100a] font-bold cursor-pointer"
+                        >
+                          {Array.from({ length: maxVerses }, (_, i) => i + 1).filter(v => v >= selectedVerse).map(v => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Panel de Lectura del Versículo */}
+                  <div className="rounded-lg p-5 md:p-6 shadow-md border-l-4 border-l-[#8a3324] border-y border-r border-[#d3c4a1] flex flex-col" style={{ backgroundColor: '#fffdf7' }}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 pb-2 border-b border-[#d3c4a1] gap-2">
+                      <span className="text-xs font-bold uppercase opacity-80" style={{ color: '#8a3324' }}>Lectura ({bibleVersion})</span>
+                      <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
+                        <button onClick={() => navigateVerse(-1)} className="px-2.5 py-1 border border-[#d3c4a1] bg-[#faf5e6] text-[#15100a] rounded text-xs font-bold cursor-pointer hover:bg-[#d3c4a1]">Anterior</button>
+                        <span className="text-sm md:text-base font-bold text-[#15100a] px-2 serif-title">
+                          {selectedBook} {selectedChapter}:{selectedVerse}{selectedVerse !== selectedEndVerse ? `-${selectedEndVerse}` : ''}
+                        </span>
+                        <button onClick={() => navigateVerse(1)} className="px-2.5 py-1 border border-[#d3c4a1] bg-[#faf5e6] text-[#15100a] rounded text-xs font-bold cursor-pointer hover:bg-[#d3c4a1]">Siguiente</button>
+                      </div>
+                    </div>
+
+                    {/* Scrollable interno para pasajes largos */}
+                    <div className="max-h-64 overflow-y-auto pr-1 text-justify scrollbar-thin">
+                      {loadingVerse ? (
+                        <p className="italic text-center text-[#8a3324] text-base py-4">Buscando del manuscrito...</p>
+                      ) : (
+                        <p className="text-lg md:text-2xl font-medium leading-relaxed italic m-0 text-[#15100a]" style={{ fontFamily: "'Lora', Georgia, serif" }}>
+                          "{verseText || 'Selecciona un pasaje para leer'}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {}
+                <div className="lg:col-span-8 flex flex-col gap-5">
+                  
+                  {/* Menú de Pestañas con Desplazamiento Táctil en Móvil */}
+                  <div className="flex overflow-x-auto whitespace-nowrap border-b-2 border-[#d3c4a1] gap-2 pb-1 scrollbar-none">
+                    <button
+                      onClick={() => setActiveTab("commentaries")}
+                      className="py-2.5 px-4 border-none font-bold text-sm md:text-lg cursor-pointer rounded-t-md transition-colors duration-200 serif-title"
+                      style={{
+                        backgroundColor: activeTab === "commentaries" ? "#fffdf7" : "transparent",
+                        color: activeTab === "commentaries" ? "#8a3324" : "#15100a",
+                        borderBottom: activeTab === "commentaries" ? "3px solid #8a3324" : "none"
+                      }}
+                    >
+                      <span style={{ color: '#8a3324' }}>Comentarios</span> Bíblicos
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("outlines")}
+                      className="py-2.5 px-4 border-none font-bold text-sm md:text-lg cursor-pointer rounded-t-md transition-colors duration-200 serif-title"
+                      style={{
+                        backgroundColor: activeTab === "outlines" ? "#fffdf7" : "transparent",
+                        color: activeTab === "outlines" ? "#8a3324" : "#15100a",
+                        borderBottom: activeTab === "outlines" ? "3px solid #8a3324" : "none"
+                      }}
+                    >
+                      <span style={{ color: '#8a3324' }}>Bosquejo</span> de Sermon
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("context")}
+                      className="py-2.5 px-4 border-none font-bold text-sm md:text-lg cursor-pointer rounded-t-md transition-colors duration-200 serif-title"
+                      style={{
+                        backgroundColor: activeTab === "context" ? "#fffdf7" : "transparent",
+                        color: activeTab === "context" ? "#8a3324" : "#15100a",
+                        borderBottom: activeTab === "context" ? "3px solid #8a3324" : "none"
+                      }}
+                    >
+                      <span style={{ color: '#8a3324' }}>Contexto</span> Paralelo
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("exegesis")}
+                      className="py-2.5 px-4 border-none font-bold text-sm md:text-lg cursor-pointer rounded-t-md transition-colors duration-200 serif-title"
+                      style={{
+                        backgroundColor: activeTab === "exegesis" ? "#fffdf7" : "transparent",
+                        color: activeTab === "exegesis" ? "#8a3324" : "#15100a",
+                        borderBottom: activeTab === "exegesis" ? "3px solid #8a3324" : "none"
+                      }}
+                    >
+                      <span style={{ color: '#8a3324' }}>Exégesis</span> de Palabras
+                    </button>
+                  </div>
+
+                  {/* Cuerpo Dinámico de la Pestaña Seleccionada */}
+                  <div className="min-h-[450px]">
+                    {error && (
+                      <div className="bg-[#fee2e2] border border-red-200 text-red-800 p-4 rounded-md text-sm md:text-base mb-4 font-bold">
+                        {error}
+                      </div>
+                    )}
+
+                    {/* PESTAÑA 1: COMENTARIOS BÍBLICOS */}
+                    {activeTab === "commentaries" && (
+                      <div className="rounded-lg p-5 md:p-6 shadow-md border border-[#d3c4a1]" style={{ backgroundColor: '#fffdf7' }}>
+                        {!commentariesLoaded && !loadingCommentaries ? (
+                          <div className="text-center py-10 px-4">
+                            <p className="text-sm md:text-lg text-[#15100a] mb-5">Los extractos verbatim de los 8 teólogos reformados para este pasaje no están cargados en este momento.</p>
+                            <button onClick={fetchCommentariesOnly} className="text-[#ffffff] py-3 px-6 rounded font-bold text-sm md:text-base cursor-pointer hover:opacity-90 transition-all" style={{ backgroundColor: '#3b593f' }}>
+                              Cargar Citas Originales de este Rango
+                            </button>
+                          </div>
+                        ) : loadingCommentaries ? (
+                          <div className="text-center py-12">
+                            <p className="font-bold text-[#8a3324] text-xl serif-title animate-pulse">Recuperando registros y transcripciones históricas...</p>
+                            <p className="text-xs md:text-sm text-[#4a3a2a] mt-2">Accediendo a traducciones de fuentes originales autorizadas.</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <h3 className="text-lg md:text-xl text-[#8a3324] border-b border-[#d3c4a1] pb-2 mb-4 font-bold serif-title">8 Autores de la Tradición Reformada (Textos Originales)</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                              {Object.keys(AUTHORS_META).map((authorName) => {
+                                const meta = AUTHORS_META[authorName];
+                                return (
+                                  <div key={authorName} className="border border-[#d3c4a1] rounded-md p-4 flex flex-col justify-between bg-[#faf5e6] hover:border-[#8a3324] transition-all">
+                                    <div>
+                                      <div className="flex justify-between items-center mb-2 gap-2">
+                                        <span className="text-xs text-[#8a3324] font-bold truncate">{meta.role}</span>
+                                        <span className="text-[10px] bg-[#d3c4a1] text-[#15100a] px-2 py-0.5 rounded font-bold border border-[#c4b18c] whitespace-nowrap">{meta.tag}</span>
+                                      </div>
+                                      <h4 className="m-0 text-base md:text-xl text-[#15100a] font-bold mb-4 serif-title">{authorName}</h4>
+                                    </div>
+                                    <button
+                                      onClick={() => setActiveAuthor(authorName)}
+                                      className="w-full py-2 text-[#ffffff] border-none rounded text-xs md:text-sm font-bold cursor-pointer transition-all hover:opacity-90"
+                                      style={{ backgroundColor: '#3b593f' }}
+                                    >
+                                      Leer Cita Literal
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* PESTAÑA 2: BOSQUEJO DE SERMÓN */}
+                    {activeTab === "outlines" && (
+                      <div className="rounded-lg p-5 md:p-6 shadow-md border border-[#d3c4a1]" style={{ backgroundColor: '#fffdf7' }}>
+                        {!outlineLoaded && !loadingOutline ? (
+                          <div className="text-center py-10 px-4">
+                            <p className="text-sm md:text-lg text-[#15100a] mb-5">
+                              El bosquejo expositivo estructurado bajo la metodología del Simeon Trust no se encuentra cargado para este rango.
+                            </p>
+                            <button onClick={fetchSermonOutlineOnly} className="text-[#ffffff] py-3 px-6 rounded font-bold text-sm md:text-base cursor-pointer hover:opacity-90 transition-all" style={{ backgroundColor: '#3b593f' }}>
+                              Analizar Pasaje y Diseñar Bosquejo
+                            </button>
+                          </div>
+                        ) : loadingOutline ? (
+                          <div className="text-center py-12">
+                            <p className="font-bold text-[#8a3324] text-xl serif-title animate-pulse">Procesando estructura homilética y delimitaciones...</p>
+                            <p className="text-xs md:text-sm text-[#4a3a2a] mt-2">Evaluando cohesión de perícopa para la predicación.</p>
+                          </div>
+                        ) : sermonOutline ? (
+                          <div className="flex flex-col gap-5">
+                            
+                            <div className="border-b-2 border-[#d3c4a1] pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                              <div>
+                                <h3 className="m-0 text-lg md:text-2xl text-[#8a3324] font-bold serif-title">Estructura Homilética del Mensaje</h3>
+                                <p className="m-0 text-xs md:text-sm text-[#4a3a2a]">Predicación basada en límites literarios cohesivos.</p>
+                              </div>
+                              <div className="text-[#15100a] font-bold py-1.5 px-3.5 rounded text-xs md:text-sm whitespace-nowrap border border-[#d3c4a1]" style={{ backgroundColor: '#faf5e6' }}>
+                                Perícopa Evaluada: {sermonOutline.pericopaRango}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="border border-[#d3c4a1] rounded-md p-4 bg-[#faf5e6]">
+                                <strong className="text-xs text-[#8a3324] block mb-2 uppercase tracking-wide">LÍNEA MELÓDICA DEL LIBRO</strong>
+                                <p className="m-0 text-sm italic font-medium leading-relaxed text-[#15100a]">"{sermonOutline.lineaMelodica}"</p>
+                              </div>
+                              <div className="border border-[#d3c4a1] rounded-md p-4 bg-[#faf5e6] border-l-4 border-l-[#3b593f]">
+                                <strong className="text-xs text-[#3b593f] block mb-2 uppercase tracking-wide">IDEA CENTRAL DEL TEXTO (ICT)</strong>
+                                <p className="m-0 text-sm leading-relaxed text-[#15100a] font-medium">{sermonOutline.ideaCentralTexto}</p>
+                              </div>
+                              <div className="border border-[#d3c4a1] rounded-md p-4 bg-[#faf5e6] border-l-4 border-l-[#8a3324]">
+                                <strong className="text-xs text-[#8a3324] block mb-2 uppercase tracking-wide">IDEA CENTRAL DEL SERMÓN (ICS)</strong>
+                                <p className="m-0 text-sm font-bold leading-relaxed text-[#15100a]">{sermonOutline.ideaCentralSermon}</p>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="m-0 mb-3 text-sm md:text-base text-[#8a3324] font-bold uppercase">Divisiones del Texto para Predicación Expositiva</h4>
+                              <div className="flex flex-col gap-4">
+                                {sermonOutline.estructuraExpositiva && sermonOutline.estructuraExpositiva.map((div, i) => (
+                                  <div key={i} className="border-l-4 border-[#3b593f] p-4 rounded-r-md border-y border-r border-[#d3c4a1] bg-[#fcf9f2]">
+                                    <div className="flex justify-between items-center text-xs md:text-sm text-[#15100a] mb-2 gap-2">
+                                      <strong className="text-[#8a3324] text-sm md:text-lg font-bold truncate serif-title">{div.porcion}</strong>
+                                      <span className="font-bold whitespace-nowrap">División {i + 1}</span>
+                                    </div>
+                                    <h5 className="m-0 text-base md:text-lg text-[#15100a] font-bold mb-2 serif-title">{div.titulo}</h5>
+                                    <p className="m-0 text-sm leading-relaxed text-[#4a3a2a]">{div.explicacion}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="border border-[#d3c4a1] p-4 rounded-md bg-[#faf5e6] border-l-4 border-l-[#8a3324]">
+                              <strong className="text-xs text-[#8a3324] block mb-1.5 uppercase tracking-wide">EL CAMINO A LA CRUZ (ENFOQUE HISTÓRICO-REDENTOR)</strong>
+                              <p className="m-0 text-sm leading-relaxed text-[#15100a] font-medium">{sermonOutline.caminoCruz}</p>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+
+                    {/* PESTAÑA 3: CONTEXTO PARALELO */}
+                    {activeTab === "context" && (
+                      <div className="rounded-lg p-5 md:p-6 shadow-md border border-[#d3c4a1]" style={{ backgroundColor: '#fffdf7' }}>
+                        {!contextLoaded && !loadingContext ? (
+                          <div className="text-center py-10 px-4">
+                            <p className="text-sm md:text-lg text-[#15100a] mb-5">La intertextualidad e interconexiones bíblicas canónicas para este pasaje no están cargadas.</p>
+                            <button onClick={fetchBiblicalContextOnly} className="text-[#ffffff] py-3 px-6 rounded font-bold text-sm md:text-base cursor-pointer hover:opacity-90 transition-all" style={{ backgroundColor: '#3b593f' }}>
+                              Buscar Pasajes Cruzados (Analogía de la Fe)
+                            </button>
+                          </div>
+                        ) : loadingContext ? (
+                          <div className="text-center py-12">
+                            <p className="font-bold text-[#8a3324] text-xl serif-title animate-pulse">Trazando puentes e intertextualidades canónicas...</p>
+                            <p className="text-xs md:text-sm text-[#4a3a2a] mt-2">Buscando referencias cruzadas basadas en la analogía de la fe.</p>
+                          </div>
+                        ) : biblicalContext && biblicalContext.length > 0 ? (
+                          <div className="flex flex-col gap-4">
+                            <div className="border-b border-[#d3c4a1] pb-2">
+                              <h3 className="m-0 text-base md:text-xl text-[#8a3324] font-bold serif-title">Analogía de la Escritura e Intertextualidad</h3>
+                              <p className="m-0 text-xs md:text-sm text-[#4a3a2a]">Conexiones a lo largo de las Escrituras para iluminar la interpretación del texto.</p>
+                            </div>
+
+                            {biblicalContext.map((ref, i) => (
+                              <div key={i} className="p-4 border border-[#d3c4a1] rounded-md bg-[#faf5e6]">
+                                <div className="flex justify-between items-center mb-2 gap-2">
+                                  <strong className="text-sm md:text-lg text-[#15100a] serif-title">📖 {ref.pasaje}</strong>
+                                  <span className="text-[10px] bg-[#d3c4a1] text-[#15100a] px-2.5 py-0.5 rounded font-bold border border-[#c4b18c] whitespace-nowrap">{ref.relacion}</span>
+                                </div>
+                                <p className="m-0 text-sm text-[#15100a] leading-relaxed">{ref.explicacion}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+
+                    {}
+                    {/* PESTAÑA 4: EXÉGESIS DE PALABRAS */}
+                    {activeTab === "exegesis" && (
+                      <div className="rounded-lg p-5 md:p-6 shadow-md border border-[#d3c4a1]" style={{ backgroundColor: '#fffdf7' }}>
+                        {!exegesisLoaded && !loadingExegesis ? (
+                          <div className="text-center py-10 px-4">
+                            <p className="text-sm md:text-lg text-[#15100a] mb-5">El análisis filológico y de vocabulario original en griego o hebreo para este pasaje no se ha cargado.</p>
+                            <button onClick={fetchExegesisOnly} className="text-[#ffffff] py-3 px-6 rounded font-bold text-sm md:text-base cursor-pointer hover:opacity-90 transition-all" style={{ backgroundColor: '#3b593f' }}>
+                              Realizar Exégesis de Palabras
+                            </button>
+                          </div>
+                        ) : loadingExegesis ? (
+                          <div className="text-center py-12">
+                            <p className="font-bold text-[#8a3324] text-xl serif-title animate-pulse">Analizando códices e idiomas originales...</p>
+                            <p className="text-xs md:text-sm text-[#4a3a2a] mt-2">Traduciendo raíces, localizando números Strong y evaluando el contexto cultural.</p>
+                          </div>
+                        ) : exegesisData && exegesisData.length > 0 ? (
+                          <div className="flex flex-col gap-4">
+                            <div className="border-b border-[#d3c4a1] pb-2">
+                              <h3 className="m-0 text-base md:text-xl text-[#8a3324] font-bold serif-title">Exégesis Filológica de Términos</h3>
+                              <p className="m-0 text-xs md:text-sm text-[#4a3a2a]">Análisis morfológico y semántico de vocablos en hebreo o griego.</p>
+                            </div>
+
+                            <div className="flex flex-col gap-4">
+                              {exegesisData.map((term, i) => (
+                                <div key={i} className="border border-[#d3c4a1] rounded-md bg-[#faf5e6] overflow-hidden">
+                                  
+                                  <div className="p-3 md:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#d3c4a1] gap-2" style={{ backgroundColor: '#fcf9f2' }}>
+                                    <div>
+                                      <strong className="text-base md:text-lg text-[#15100a] serif-title">{term.word}</strong>
+                                      <span className="ml-2 text-sm md:text-base italic text-[#8a3324] font-bold">{term.original}</span>
+                                    </div>
+                                    <span className="text-[#15100a] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#d3c4a1] bg-[#fffdf7]">
+                                      Strong {term.strong}
+                                    </span>
+                                  </div>
+
+                                  <div className="p-4 flex flex-col gap-3.5">
+                                    <div>
+                                      <strong className="block text-xs text-[#8a3324] uppercase mb-1">Léxico y Semántica</strong>
+                                      <p className="m-0 text-sm leading-relaxed text-[#15100a]">{term.lexicon}</p>
+                                    </div>
+                                    <div>
+                                      <strong className="block text-xs text-[#8a3324] uppercase mb-1">Contexto Histórico y Cultural</strong>
+                                      <p className="m-0 text-sm leading-relaxed text-[#15100a]">{term.historicalContext}</p>
+                                    </div>
+                                    <div className="p-3.5 rounded border-l-4 border-l-[#3b593f] bg-[#fcf9f2]">
+                                      <strong className="block text-xs text-[#3b593f] uppercase mb-1">Enriquecimiento Exegético y Homilético</strong>
+                                      <p className="m-0 text-sm leading-relaxed text-[#15100a] font-medium">{term.enrichment}</p>
+                                    </div>
+                                  </div>
+
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {}
+              {/* Lector Modal de Citas Literales */}
+              {activeAuthor && (
+                <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-3 sm:p-4">
+                  <div className="w-full max-w-2xl rounded-lg flex flex-col max-h-[90vh] border border-[#d3c4a1] shadow-2xl overflow-hidden" style={{ backgroundColor: '#fffdf7' }}>
+                    
+                    <div className="p-4 border-b border-[#d3c4a1] flex flex-row justify-between items-center gap-2" style={{ backgroundColor: '#faf5e6' }}>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs text-[#8a3324] uppercase font-bold block">Texto Original Verbatim / Sin Explicaciones</span>
+                        <h3 className="m-0 text-lg sm:text-2xl text-[#15100a] font-bold truncate serif-title">{activeAuthor}</h3>
+                      </div>
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <button
+                          onClick={() => setFontSize(fontSize === "text-xs" ? "text-sm" : fontSize === "text-sm" ? "text-base" : "text-xs")}
+                          className="p-2 sm:px-3 sm:py-1.5 border border-[#d3c4a1] text-[#15100a] rounded text-xs font-bold cursor-pointer hover:bg-[#d3c4a1] transition-all"
+                          style={{ backgroundColor: '#fffdf7' }}
+                        >
+                          Letra
+                        </button>
+                        <button
+                          onClick={() => setActiveAuthor(null)}
+                          className="p-2 sm:px-3 sm:py-1.5 border-none text-[#ffffff] rounded text-xs font-bold cursor-pointer hover:opacity-95 transition-all"
+                          style={{ backgroundColor: '#8a3324' }}
+                        >
+                          Cerrar
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-5 overflow-y-auto flex-1">
+                      <div className="p-3 border border-[#d3c4a1] rounded text-center text-xs sm:text-sm text-[#8a3324] mb-4 font-medium italic" style={{ backgroundColor: '#faf5e6' }}>
+                        {selectedBook} {selectedChapter}:{selectedVerse}{selectedVerse !== selectedEndVerse ? `-${selectedEndVerse}` : ''} ({bibleVersion}) — "{verseText}"
+                      </div>
+
+                      <div
+                        className="leading-relaxed text-justify font-medium mb-5 text-[#15100a]"
+                        style={{
+                          fontSize: fontSize === "text-xs" ? '15px' : fontSize === "text-sm" ? '18px' : '21px'
+                        }}
+                      >
+                        {commentaries[activeAuthor] ? (
+                          commentaries[activeAuthor].split('\n').map((para, i) => (
+                            para.trim() && (
+                              <p key={i} className="mb-4" style={{ textIndent: '20px' }}>{para}</p>
+                            )
+                          ))
+                        ) : (
+                          <p className="text-center italic text-[#15100a]">
+                            Comentario no cargado para este pasaje. Pulsa el botón de carga en la pestaña para obtenerlo.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bibliografía Académica Oficial */}
+                    <div className="p-4 border-t bg-[#faf5e6] text-xs text-gray-700" style={{ borderTopColor: '#d3c4a1' }}>
+                      <strong className="block text-[10px] uppercase font-bold tracking-wider mb-1 text-[#8a3324]">Referencia Bibliográfica de Consulta:</strong>
+                      {activeAuthor === "Juan Calvino" && <p className="font-serif italic text-sm text-[#15100a]">Calvino, Juan. *Comentario sobre el Libro de Génesis* (y otros comentarios del Antiguo y Nuevo Testamento). Traducido al español. Ginebra, Siglo XVI.</p>}
+                      {activeAuthor === "John Owen" && <p className="font-serif italic text-sm text-[#15100a]">Owen, John. *Exposición de la Epístola a los Hebreos* y *De la Mortificación del Pecado*. Londres, Siglo XVII.</p>}
+                      {activeAuthor === "John Gill" && <p className="font-serif italic text-sm text-[#15100a]">Gill, John. *An Exposition of the Old and New Testaments* (Exposición del Antiguo y Nuevo Testamento). Londres, Siglo XVIII.</p>}
+                      {activeAuthor === "Charles Spurgeon" && <p className="font-serif italic text-sm text-[#15100a]">Spurgeon, Charles Haddon. *El Tesoro de David* (Comentario sobre los Salmos) y *Colección de Sermones Metropolitanos*. Londres, Siglo XIX.</p>}
+                      {activeAuthor === "Arthur Pink" && <p className="font-serif italic text-sm text-[#15100a]">Pink, Arthur W. *La Soberanía de Dios* y *Exposición del Evangelio de Juan*. Siglo XX.</p>}
+                      {activeAuthor === "Jonathan Edwards" && <p className="font-serif italic text-sm text-[#15100a]">Edwards, Jonathan. *Tratado sobre los Afectos Religiosos* y *Obras Teológicas Completas*. Northampton, Siglo XVIII.</p>}
+                      {activeAuthor === "William Hendriksen" && <p className="font-serif italic text-sm text-[#15100a]">Hendriksen, William. *Comentario al Nuevo Testamento* (Comentario Exegético-Pactual). Grand Rapids, Michigan, Siglo XX.</p>}
+                      {activeAuthor === "John Piper" && <p className="font-serif italic text-sm text-[#15100a]">Piper, John. *Deseando a Dios: Meditaciones de un hedonista cristiano* e *Iniciativas de Estudio Teológico*. Desiring God Ministries, Siglo XXI.</p>}
+                    </div>
+
+                    <div className="p-3 border-t border-[#d3c4a1] text-[10px] sm:text-xs uppercase text-[#8a3324] text-center font-bold" style={{ backgroundColor: '#faf5e6' }}>
+                      Soli Deo Gloria • Sola Scriptura
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
